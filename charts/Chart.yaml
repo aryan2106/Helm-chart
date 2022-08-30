@@ -1,10 +1,13 @@
 apiVersion: v2
-name: aryan-app
+name: flux2-notification
 type: application
 version: 1.1.0
-#appVersion: 0.32.0
-description: A Helm chart 
+appVersion: 0.32.0
+description: A Helm chart for flux2 alerts and the needed providers and secrets
 sources:
-  - https://github.com/aryan2106/Helm-chart
+  - https://github.com/fluxcd-community/helm-charts
+annotations:
+  artifacthub.io/changes: |
+    - "[Update]: Update App Version to upstream 0.32.0"
 
   
