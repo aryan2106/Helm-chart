@@ -4,10 +4,6 @@ on:
   push:
     branches:
       - main
-    paths-ignore:
-      - "**.md"
-      - "**.md.gotmpl"
-      
 
 permissions:
   contents: write
@@ -27,17 +23,9 @@ jobs:
 
       - name: Run chart-releaser
         uses: helm/chart-releaser-action@v1.0.0
-        with:
-          charts_repo_url: https://aryan2106.github.io/Helm-chart
         env:
           CR_TOKEN: "${{ secrets.ACCESS_TOKEN }}"
 
-      - name: Login to GitHub Container Registry
-        uses: docker/login-action@v1
-        with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.ACCESS_TOKEN }}
           
       - name: Push Charts to GHCR
         run: |
