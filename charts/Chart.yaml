@@ -1,4 +1,0 @@
-apiVersion: v2
-description: A Helm chart for our Calance applications
-name: calance
-version: "1.0"
