@@ -1,0 +1,72 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ template "fullname" . }}
+  labels:
+    app: {{ template "name" . }}
+    chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app: {{ template "name" . }}
+      release: {{ .Release.Name }}
+  template:
+    metadata:
+      labels:
+        app: {{ template "name" . }}
+        release: {{ .Release.Name }}
+    spec:
+    {{- if .Values.hostAliases }}
+      hostAliases: {{- .Values.hostAliases | toYaml | nindent 8 }}
+    {{- end }}
+      imagePullSecrets:
+        - name: {{ .Values.image.pullSecret }}
+      containers:
+        - name: {{ .Chart.Name }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+    {{- if .Values.image.command }}
+          command:
+          {{ range .Values.image.command }}
+            - {{ . }}
+          {{ end }}
+    {{- end }}
+          ports:
+            - containerPort: {{ .Values.service.internalPort }}
+    {{- if .Values.image.configMapName }}
+          envFrom:
+            - configMapRef:
+                name: {{ .Values.image.configMapName }}
+    {{- end }}
+    {{- if .Values.image.livenessProbe }}
+          livenessProbe:
+            httpGet:
+              path: {{ .Values.image.livenessProbe }}
+              port: {{ .Values.service.internalPort }}
+    {{- end }}
+    {{- if .Values.image.readinessProbe}}
+          readinessProbe:
+            httpGet:
+              path: {{ .Values.image.readinessProbe }}
+              port: {{ .Values.service.internalPort }}
+    {{- end }}
+    {{- if .Values.persistence.enabled }}
+          volumeMounts:
+          - mountPath: {{ .Values.persistence.mountPath }}
+            name: {{ template "name" . }}-data
+    {{- end }}
+          resources:
+{{ toYaml .Values.resources | indent 12 }}
+    {{- if .Values.persistence.enabled }}
+      volumes:
+      - name: {{ template "name" . }}-data
+        persistentVolumeClaim:
+          claimName: {{ template "fullname" . }}
+    {{- end }}
+    {{- if .Values.nodeSelector }}
+      nodeSelector:
+{{ toYaml .Values.nodeSelector | indent 8 }}
+    {{- end }}
